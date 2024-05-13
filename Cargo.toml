@@ -1,6 +1,6 @@
 [package]
 name = "app"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
   "CyberHoward <cyberhoward@protonmail.com>",
   "Adair <adair@abstract.money>",
@@ -50,14 +50,17 @@ abstract-app = { version = "0.21.0" }
 
 # Dependencies for interface
 cw-orch = { version = "0.20.1", optional = true }
+archid-registry = { version = "1.1.0", git = "https://github.com/ariesgun/archid-registry.git", features = ["library"] }
 
 [dev-dependencies]
 app = { path = ".", features = ["interface"] }
 abstract-client = { version = "0.21.0" }
 abstract-app = { version = "0.21", features = ["test-utils"] }
+abstract-interface = { version = "0.21.0" , features = ["daemon"]}
 speculoos = "0.11.0"
 semver = "1.0"
 dotenv = "0.15.0"
 env_logger = "0.10.0"
-cw-orch = { version = "0.20.1" }
+cw-orch = { version = "0.20.1", features = ["daemon"] }
 clap = { version = "4.3.7", features = ["derive"] }
+abstract-testing = "0.22.1"

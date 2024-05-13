@@ -4,7 +4,7 @@ use cosmwasm_std::{DepsMut, Env, MessageInfo};
 use crate::contract::{App, AppResult};
 
 use crate::msg::AppExecuteMsg;
-use crate::state::{CONFIG, COUNT};
+use crate::state::{CONFIG, COUNT, DEFAULT_ID_MAP};
 
 pub fn execute_handler(
     deps: DepsMut,
@@ -17,6 +17,7 @@ pub fn execute_handler(
         AppExecuteMsg::Increment {} => increment(deps, app),
         AppExecuteMsg::Reset { count } => reset(deps, info, count, app),
         AppExecuteMsg::UpdateConfig {} => update_config(deps, info, app),
+        AppExecuteMsg::UpdateDefaultID {} =>update_default_id(deps, info, app),
     }
 }
 
@@ -41,3 +42,14 @@ fn update_config(deps: DepsMut, msg_info: MessageInfo, app: App) -> AppResult {
 
     Ok(app.response("update_config"))
 }
+
+fn update_default_id(deps: DepsMut, msg_info: MessageInfo, app: App) -> AppResult {
+    let value = "hello.arch".to_string();
+    let _ = DEFAULT_ID_MAP.save(deps.storage, msg_info.sender.to_owned(), &value);
+
+    Ok(app
+        .response("update_default_id")
+        .add_attribute("default_id", value)
+    )
+}
+

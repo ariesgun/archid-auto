@@ -1,4 +1,6 @@
+use archid_registry::msg::ResolveRecordResponse;
 use cosmwasm_schema::QueryResponses;
+use cosmwasm_std::Addr;
 
 use crate::contract::App;
 
@@ -25,6 +27,7 @@ pub enum AppExecuteMsg {
         count: i32,
     },
     UpdateConfig {},
+    UpdateDefaultID {},
 }
 
 /// App query messages
@@ -37,6 +40,14 @@ pub enum AppQueryMsg {
     Config {},
     #[returns(CountResponse)]
     Count {},
+    #[returns(NameResolutionResponse)]
+    NameResolution {
+        domain_name: String,
+    },
+    #[returns(DefaultIdResponse)]
+    DefaultId {
+        address: Addr,
+    },
 }
 
 #[cosmwasm_schema::cw_serde]
@@ -48,4 +59,14 @@ pub struct ConfigResponse {}
 #[cosmwasm_schema::cw_serde]
 pub struct CountResponse {
     pub count: i32,
+}
+
+#[cosmwasm_schema::cw_serde]
+pub struct NameResolutionResponse {
+    pub query_resp: ResolveRecordResponse,
+}
+
+#[cosmwasm_schema::cw_serde]
+pub struct DefaultIdResponse {
+    pub default_id: String,
 }
