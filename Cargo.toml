@@ -56,7 +56,7 @@ croncat-app = { git = "https://github.com/AbstractSDK/abstract.git", tag = "v0.2
 
 [dev-dependencies]
 app = { path = ".", features = ["interface"] }
-abstract-client = { version = "0.21.0" }
+abstract-client = { version = "0.22.1" }
 abstract-app = { version = "0.21", features = ["test-utils"] }
 abstract-interface = { version = "0.21.0" , features = ["daemon"]}
 speculoos = "0.11.0"
