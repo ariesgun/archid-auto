@@ -1,7 +1,7 @@
 use abstract_app::abstract_core::AbstractError;
 use abstract_app::abstract_sdk::AbstractSdkError;
 use abstract_app::AppError as AbstractAppError;
-use cosmwasm_std::StdError;
+use cosmwasm_std::{Addr, StdError};
 use cw_asset::AssetError;
 use cw_controllers::AdminError;
 use thiserror::Error;
@@ -25,4 +25,10 @@ pub enum AppError {
 
     #[error("{0}")]
     DappError(#[from] AbstractAppError),
+
+    #[error("Native asset should be native")]
+    NotNativeAsset {},
+
+    #[error("Convert can be called only by the croncat manager {sender} vs {manager}")]
+    NotManagerConvert { sender: Addr, manager: Addr},
 }

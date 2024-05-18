@@ -51,6 +51,8 @@ abstract-app = { version = "0.21.0" }
 # Dependencies for interface
 cw-orch = { version = "0.20.1", optional = true }
 archid-registry = { version = "1.0.3", features = ["library"] }
+abstract-adapter-utils = { git = "https://github.com/AbstractSDK/abstract.git", tag = "v0.21.0" }
+croncat-app = { git = "https://github.com/AbstractSDK/abstract.git", tag = "v0.21.0", default-features = false }
 
 [dev-dependencies]
 app = { path = ".", features = ["interface"] }
@@ -64,3 +66,33 @@ env_logger = "0.10.0"
 cw-orch = { version = "0.20.1", features = ["daemon"] }
 clap = { version = "4.3.7", features = ["derive"] }
 abstract-testing = "0.22.1"
+
+# Croncat intefraces
+croncat-sdk-factory = { version = "1.0.4" }
+croncat-sdk-tasks = { version = "1.0.4" }
+croncat-sdk-manager = { version = "1.0.4" }
+croncat-sdk-agents = { version = "1.0.4" }
+# Croncat contracts
+croncat-factory = { version = "1.0.4" }
+croncat-tasks = { version = "1.0.4" }
+croncat-manager = { version = "1.0.4" }
+croncat-agents = { version = "1.0.4" }
+croncat-integration-testing = { version = "1.1.1" }
+croncat-app = { git = "https://github.com/AbstractSDK/abstract.git", tag = "v0.21.0", features = ["interface"] }
+wyndex-bundle = { git = "https://github.com/AbstractSDK/abstract.git", tag = "v0.21.0" }
+
+# Testing cw20
+cw20-base = "0.16.0"
+cw20 = "0.16.0"
+
+# Backup release profile, will result in warnings during optimization
+[profile.release]
+rpath = false
+lto = true
+overflow-checks = true
+opt-level = 3
+debug = false
+debug-assertions = false
+codegen-units = 1
+panic = 'abort'
+incremental = false

@@ -4,21 +4,25 @@ use crate::state::{CONFIG, COUNT, DEFAULT_ID_MAP};
 use archid_registry::msg::QueryMsg::ResolveRecord;
 use archid_registry::msg::ResolveRecordResponse;
 use cosmwasm_std::{to_json_binary, Addr, Binary, Deps, Env, QueryRequest, StdResult, WasmQuery};
+use abstract_app::abstract_sdk::features::AbstractNameService;
 
-
-pub fn query_handler(deps: Deps, _env: Env, _app: &App, msg: AppQueryMsg) -> AppResult<Binary> {
+pub fn query_handler(deps: Deps, _env: Env, app: &App, msg: AppQueryMsg) -> AppResult<Binary> {
     match msg {
         AppQueryMsg::Config {} => to_json_binary(&query_config(deps)?),
         AppQueryMsg::Count {} => to_json_binary(&query_count(deps)?),
         AppQueryMsg::NameResolution { domain_name } => to_json_binary(&query_name_resolution(deps, &domain_name)?),
-        AppQueryMsg::DefaultId { address } => to_json_binary(&query_default_id(deps, address)?),
+        AppQueryMsg::DefaultId { address } => to_json_binary(&query_default_id(deps, app, address)?),
     }
     .map_err(Into::into)
 }
 
 fn query_config(deps: Deps) -> StdResult<ConfigResponse> {
-    let _config = CONFIG.load(deps.storage)?;
-    Ok(ConfigResponse {})
+    let config = CONFIG.load(deps.storage)?;
+    Ok(ConfigResponse {
+        native_asset: config.native_denom.into(),
+        task_creation_amount: config.task_creation_amount.into(),
+        refill_threshold: config.refill_threshold.into(),
+    })
 }
 
 fn query_count(deps: Deps) -> StdResult<CountResponse> {
@@ -48,10 +52,13 @@ fn query_name_resolution(deps: Deps, domain_name: &str) -> StdResult<NameResolut
     Ok(NameResolutionResponse {query_resp})
 }
 
-fn query_default_id(deps: Deps, address: Addr) -> StdResult<DefaultIdResponse> {
+fn query_default_id(deps: Deps, app: &App, address: Addr) -> StdResult<DefaultIdResponse> {
 
     // TODO: Check if the address can be found in the MAP.
     let default_id_map = DEFAULT_ID_MAP.load(deps.storage, address)?;
+
+    // let ns = app.name_service(deps.clone());
+    // ns.query(entry)
     
     Ok(
         DefaultIdResponse { 

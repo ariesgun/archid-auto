@@ -9,7 +9,7 @@ install-tools:
 
 # Build everything
 build:
-  cargo build --all-features
+  cargo wasm
 
 # Test everything
 test:

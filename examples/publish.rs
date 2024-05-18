@@ -7,10 +7,12 @@
 //! ```bash
 //! $ just publish uni-6 osmo-test-5
 //! ```
-use abstract_app::{objects::namespace::Namespace};
+use abstract_app::{abstract_core::ans_host::QueryMsgFns, objects::{namespace::Namespace, AccountId, AssetEntry}};
 use abstract_client::{AbstractClient, Publisher};
-use app::{contract::{App, APP_ID}, msg::{AppInstantiateMsg, AppMigrateMsg}, AppExecuteMsgFns, AppInterface, AppQueryMsgFns};
+use app::{contract::{App, APP_ID}, msg::{AppExecuteMsg, AppInstantiateMsg, AppMigrateMsg, ExecuteMsg}, state::TaskId, AppExecuteMsgFns, AppInterface, AppQueryMsgFns};
 use clap::Parser;
+use cosmwasm_std::{BankMsg, Uint128};
+use cw_asset::Asset;
 use cw_orch::{
     anyhow, daemon::ChainInfo, prelude::{networks::parse_network, DaemonBuilder}, tokio::runtime::Runtime
 };
@@ -30,7 +32,7 @@ fn publish(networks: Vec<ChainInfo>) -> anyhow::Result<()> {
             .build()?;
 
         let app_namespace = Namespace::from_id(APP_ID)?;
-        println!("Hey {}", app_namespace);
+        println!("Namespace {}", app_namespace);
 
         // Create an [`AbstractClient`]
         let abstract_client: AbstractClient<Daemon> = AbstractClient::new(chain.clone())?;
@@ -48,25 +50,104 @@ fn publish(networks: Vec<ChainInfo>) -> anyhow::Result<()> {
         // // Publish the App to the Abstract Platform
         publisher.publish_app::<AppInterface<Daemon>>()?;
 
+        let res = abstract_client.name_service().contract_list(None, Some(10), None)?;
+        println!("Res {:?}", res);
+
         println!("Account builder");
         let account = abstract_client.account_builder()
-            .install_app::<AppInterface<Daemon>>(&AppInstantiateMsg { count: 123 })?
+            .install_app_with_dependencies::<AppInterface<Daemon>>(
+                &AppInstantiateMsg { 
+                    count: 0,
+                    native_asset: AssetEntry::new("osmosis>osmo"),
+                    refill_threshold: Uint128::new(0),
+                    task_creation_amount: Uint128::new(0),
+                },
+                Empty {}
+            )?
             .build()?;
+        println!("Done");
+
+        // let account = abstract_client.account_from(AccountId::local(89))?;
+
+        // let app = account.install_app_with_dependencies::<AppInterface<Daemon>>(
+        //     &AppInstantiateMsg { 
+        //         count: 0,
+        //         native_asset: AssetEntry::new("osmosis>osmo"),
+        //         refill_threshold: Uint128::new(0),
+        //         task_creation_amount: Uint128::new(30000000000000000),
+        //     }, 
+        //     Empty {},
+        //     &[]
+        // )?;
+
+        // let app = account.install_app_with_dependencies::<AppInterface<Daemon>>(
+        //     &AppInstantiateMsg { 
+        //         count: 0,
+        //         native_asset: AssetEntry::new("archway>const"),
+        //         refill_threshold: Uint128::new(0),
+        //         task_creation_amount: Uint128::new(30000000000000000),
+        //     }, 
+        //     Empty {}, 
+        //     &[]
+        // )?;
+        
+        // account.install_app::<AppInterface<Daemon>>(
+        //     &AppInstantiateMsg { 
+        //         count: 0,
+        //         native_asset: AssetEntry::new("archway>const"),
+        //         refill_threshold: Uint128::new(0),
+        //         task_creation_amount: Uint128::new(30000000000000000),
+        //     }, &[])?;
+
+        // chain.execute(
+        //     BankMsg::Send {
+        //         to_address: account.manager(),,
+        //         amount: vec![Coin::new(10000000000000000, "aconst")],
+        //     }, 
+        //     coins, 
+        //     contract_address
+        // );
 
         // let account = publisher.account();
         // let app = publisher.account()
         //     .install_app::<AppInterface<Daemon>>(&AppInstantiateMsg { count: 123 }, &[])?;
         let app = account.application::<AppInterface<Daemon>>()?;
 
+        // chain.wallet().
+
         println!("Account {:?}", account.module_infos());
         println!("Account {:?}", account);
 
         println!("Incrementing...");
-        // app.increment();
+        app.increment();
         println!("Count {}", app.count()?.count);
+        
+        // let result = app.register_domain_2("xenos3".to_string())?;
+        // println!("Result {:?}", result);
 
-        let result = app.name_resolution("archid.arch".to_string());
-        println!("Result {:?}", result);
+        let result = app.name_resolution("xenos3.arch".to_string())?;
+        println!("Name resolution {:?}", result);
+
+        let result = app.renew_domain(TaskId(1))?;
+
+        // account.manager().execute_on_module(
+        //     "abstract",
+        //     Into::<ExecuteMsg>::into(AppExecuteMsg::Increment {}),
+        // )?;
+
+        // let result = app.register_domain("xenos1.arch".to_string())?;
+        // println!("Result {:?}", result);
+        
+        // let result = app.register_domain_2("xenos1".to_string())?;
+        // println!("Result {:?}", result);
+        // let result = app.name_resolution("xenos1.arch".to_string());
+        // println!("Result {:?}", result);
+        // let result = app.name_resolution("xenos2.arch".to_string());
+        // println!("Result {:?}", result);
+
+        // Renew domain
+
+
     }
     Ok(())
 }

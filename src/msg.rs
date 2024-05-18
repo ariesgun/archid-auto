@@ -1,8 +1,9 @@
+use abstract_app::objects::AssetEntry;
 use archid_registry::msg::ResolveRecordResponse;
 use cosmwasm_schema::QueryResponses;
-use cosmwasm_std::Addr;
+use cosmwasm_std::{Addr, Uint128};
 
-use crate::contract::App;
+use crate::{contract::App, state::TaskId};
 
 // This is used for type safety and re-exporting the contract endpoint structs.
 abstract_app::app_msg_types!(App, AppExecuteMsg, AppQueryMsg);
@@ -12,6 +13,9 @@ abstract_app::app_msg_types!(App, AppExecuteMsg, AppQueryMsg);
 pub struct AppInstantiateMsg {
     /// Initial count
     pub count: i32,
+    pub native_asset: AssetEntry,
+    pub task_creation_amount: Uint128,
+    pub refill_threshold: Uint128,
 }
 
 /// App execute messages
@@ -28,6 +32,20 @@ pub enum AppExecuteMsg {
     },
     UpdateConfig {},
     UpdateDefaultID {},
+    #[cfg_attr(feature = "interface", payable)]
+    RegisterDomain {
+        desired_name: String,
+    },
+    RegisterDomain2 {
+        desired_name: String,
+    },
+    CreateAutoRenewalTask {
+        frequency: String,
+        domain_name: String,
+    },
+    RenewDomain {
+        task_id: TaskId
+    }
 }
 
 /// App query messages
@@ -54,7 +72,16 @@ pub enum AppQueryMsg {
 pub struct AppMigrateMsg {}
 
 #[cosmwasm_schema::cw_serde]
-pub struct ConfigResponse {}
+pub struct ConfigResponse {
+    /// Native gas/stake asset that used for attaching to croncat task
+    pub native_asset: AssetEntry,
+    /// Initial amount in native asset that sent on creating/refilling DCA
+    /// to croncat to cover gas usage of agents
+    pub task_creation_amount: Uint128,
+    /// Threshold when task refill should happen
+    /// if it's lower during [`DCAExecuteMsg::Convert`] DCA will refill croncat task
+    pub refill_threshold: Uint128
+}
 
 #[cosmwasm_schema::cw_serde]
 pub struct CountResponse {
